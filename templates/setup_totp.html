@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Setup 2FA - AuthVault</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Setup Two-Factor Authentication</h1>
+        <div class="info">
+            <p>QR Code functionality coming soon!</p>
+            <p>For now, please use this manual entry code in your authenticator app:</p>
+            <p><strong>Manual entry code:</strong> {{ totp_secret }}</p>
+        </div>
+        <form action="{{ url_for('verify_setup') }}" method="POST">
+            <input type="text" name="totp_code" placeholder="Enter 6-digit code" required>
+            <button type="submit">Verify Setup</button>
+        </form>
+    </div>
+</body>
+</html>

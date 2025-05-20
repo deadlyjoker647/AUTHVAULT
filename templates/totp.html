@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTP Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>TOTP Verification</h1>
+        <p>Please enter the TOTP code from your authenticator app.</p>
+        <form action="/verify_totp" method="POST">
+            <input type="text" name="totp_code" placeholder="Enter TOTP Code" required>
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+</body>
+</html>
