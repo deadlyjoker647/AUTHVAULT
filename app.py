@@ -5,6 +5,8 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 import base64, os
 from datetime import timedelta
+import qrcode
+import io
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -72,7 +74,17 @@ def get_public_key():
 def setup_totp():
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('setup_totp.html', totp_secret=users[session['username']]['totp_secret'])
+    username = session['username']
+    totp_secret = users[username]['totp_secret']
+    # Generate provisioning URI
+    uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(name=username, issuer_name="AuthVault")
+    # Generate QR code image
+    qr = qrcode.make(uri)
+    buf = io.BytesIO()
+    qr.save(buf, format='PNG')
+    qr_b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    qr_data_url = f"data:image/png;base64,{qr_b64}"
+    return render_template('setup_totp.html', totp_secret=totp_secret, qr_code=qr_data_url)
 
 @app.route('/verify_setup', methods=['POST'])
 def verify_setup():
@@ -85,11 +97,24 @@ def verify_setup():
 
 @app.route('/success')
 def success():
-    return render_template('success.html') if 'username' in session else redirect(url_for('index'))
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    username = session['username']
+    return render_template('success.html', username=username)
 
 @app.route('/totp_page')
 def totp_page():
     return render_template('totp.html') if 'username' in session else redirect(url_for('index'))
+
+@app.route('/verify_totp', methods=['POST'])
+def verify_totp():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    username = session['username']
+    totp_code = request.form['totp_code']
+    if pyotp.TOTP(users[username]['totp_secret']).verify(totp_code):
+        return redirect(url_for('success'))
+    return "Invalid TOTP code", 401
 
 if __name__ == '__main__':
     app.run(debug=True)

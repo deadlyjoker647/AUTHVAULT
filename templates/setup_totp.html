@@ -9,8 +9,13 @@
     <div class="container">
         <h1>Setup Two-Factor Authentication</h1>
         <div class="info">
-            <p>QR Code functionality coming soon!</p>
-            <p>For now, please use this manual entry code in your authenticator app:</p>
+            {% if qr_code %}
+            <div class="qr-container">
+                <p>Scan this QR code with your authenticator app:</p>
+                <img src="{{ qr_code }}" alt="TOTP QR Code">
+            </div>
+            <p>Or use this manual entry code:</p>
+            {% endif %}
             <p><strong>Manual entry code:</strong> {{ totp_secret }}</p>
         </div>
         <form action="{{ url_for('verify_setup') }}" method="POST">
